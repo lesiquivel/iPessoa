@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link rel="icon" href="https://cdn3.iconfinder.com/data/icons/iconpark-vol-10/48/peoples-two-512.png" type="image/x-icon">        
+        <title>iPessoa</title>
+    </head>
+    <body>
+        <h1> iPessoa - índice de pessoas cadastradas</h1>
+        <table         
+            <thead>
+                <tr>
+                    <th>NOME</th>
+                    <th>DATA DE ADMISSÃO</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for person in people %}
+                <tr>
+                    <td>{{ person["name"] }}</td>
+                    <td>{{ person["admissionDate"] }}</td>
+                    <td>
+                        <button onclick="verMais({{ person.id }})">VER MAIS</button>
+                        <button onclick="editar({{ person.id }})">EDITAR</button>
+                        <button onclick="excluir({{ person.id }})">EXCLUIR</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>            
+        </table>
+        <button onclick="adcionarPessoa()">ADCIONAR REGISTRO</button>
+        <script>
+            function voltar() {
+                window.location.href = "/";
+            }
+            function formatarData(data) {
+                const digitsOnly = data.replace(/[^\d]/g, '');
+                if (digitsOnly.length !== 8) {
+                    return "Não é possível formatar: a data deve ter 8 dígitos";
+                }
+                const dia = parseInt(digitsOnly.substr(0, 2), 10);
+                const mes = parseInt(digitsOnly.substr(2, 2), 10);
+                const ano = parseInt(digitsOnly.substr(4, 4), 10);
+                if (dia < 1 || dia > 31 || mes < 1 || mes > 12) {
+                    return "Não é possível formatar: dia ou mês fora do intervalo válido";
+                }
+                return `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+            }
+            function formatarRG(data) {
+                const digitsOnly = data.replace(/[^\d]/g, '');
+                if (digitsOnly.length !== 9) {
+                    return "Não é possível formatar: o RG deve ter 9 dígitos";
+                }
+                const formattedRG = `${digitsOnly.substr(0, 2)}.${digitsOnly.substr(2, 3)}.${digitsOnly.substr(5, 3)}-${digitsOnly.substr(8, 1)}`;
+                return formattedRG;
+            }
+            function formatarCPF(data) {
+                const digitsOnly = data.replace(/[^\d]/g, '');
+                if (digitsOnly.length !== 11) {
+                    return "Não é possível formatar: o CPF deve ter 11 dígitos";
+                }
+                const formattedCPF = `${digitsOnly.substr(0, 3)}.${digitsOnly.substr(3, 3)}.${digitsOnly.substr(6, 3)}-${digitsOnly.substr(9, 2)}`;
+                return formattedCPF;
+            }
+            function cancelarAtualizacao() {
+                window.location.href = "/";
+            }
+        </script>
+        <script>
+            function verMais(idPessoa) {
+                $.ajax({
+                    type: "GET",
+                    url: `/pessoas/${idPessoa}`,
+                    success: function (data) {
+                        const form = `
+                            <h1> iPessoa - detalhes da pessoa: ${data.nome} </h1>
+                            <form id="editForm">
+                                <label for="nome">NOME: ${data.nome}</label><br><br>
+                                <label for="rg">RG: ${data.rg}</label><br><br>
+                                <label for="cpf">CPF: ${data.cpf}</label><br><br>
+                                <label for="data_nascimento">DATA DE NASCIMENTO: ${data.data_nascimento}</label><br><br>
+                                <label for="data_admissao">DATA DE ADMISSÃO: ${data.data_admissao}</label><br><br>
+                                <label for="funcao">FUNCÃO: ${data.funcao}</label><br><br>
+                                <button type="button" onclick="voltar()">VOLTAR</button>
+                            </form>
+                        `;
+                        $("body").html(form);
+                    },
+                    error: function () {
+                        alert("Erro ao obter os detalhes da pessoa.");
+                    }
+                });
+            }
+        </script>
+        <script>
+            function editar(idPessoa) {
+                $.ajax({
+                    type: "GET",
+                    url: `/pessoas/${idPessoa}`,
+                    success: function (data) {
+                        const form = `
+                            <h1> iPessoa - editar pessoa: ${data.nome} </h1>
+                            <form id="editForm">
+                                <label for="nome">NOME:</label>
+                                <input type="text" id="nome" name="nome" value="${data.nome}"><br><br>
+                                <label for="rg">RG:</label>
+                                <input type="text" id="rg" name="rg" value="${data.rg}"><br><br>
+                                <label for="cpf">CPF:</label>
+                                <input type="text" id="cpf" name="cpf" value="${data.cpf}"><br><br>
+                                <label for="data_nascimento">DATA DE NASCIMENTO:</label>
+                                <input type="text" id="data_nascimento" name="data_nascimento" value="${data.data_nascimento}"><br><br>
+                                <label for="data_admissao">DATA DE ADMISSÃO:</label>
+                                <input type="text" id="data_admissao" name="data_admissao" value="${data.data_admissao}"><br><br>
+                                <label for="funcao">FUNCÃO:</label>
+                                <input type="text" id="funcao" name="funcao" value="${data.funcao}"><br><br>
+                                <button type="button" onclick="confirmarAtualizacao(${idPessoa})">EDITAR</button>
+                                <button type="button" onclick="cancelarAtualizacao()">CANCELAR</button>
+                            </form>
+                        `;
+                        $("body").html(form);
+                    },
+                    error: function () {
+                        alert("Erro ao obter os detalhes da pessoa.");
+                    }
+                });
+            }
+            function atualizarPessoa(idPessoa) {
+                const nome = $("#nome").val();
+                const rg = $("#rg").val();
+                const cpf = $("#cpf").val();
+                const data_nascimento = $("#data_nascimento").val();
+                const data_admissao = $("#data_admissao").val();
+                const dataFormatadaNascimento = formatarData(data_nascimento);
+                const dataFormatadaAdmissao = formatarData(data_admissao);
+                const funcao = $("#funcao").val();
+                if (dataFormatadaNascimento === "Não foi possível formatar") {
+                    alert("Data de Nascimento inválida.");
+                    return;
+                }
+                if (dataFormatadaAdmissao === "Não foi possível formatar") {
+                    alert("Data de Admissão inválida.");
+                    return;
+                }
+                $("form").html(botoes);
+                $("#nome").val(nome);
+                $("#rg").val(rg);
+                $("#cpf").val(cpf);
+                $("#data_nascimento").val(dataFormatadaNascimento);
+                $("#data_admissao").val(dataFormatadaAdmissao);
+                $("#funcao").val(funcao);
+            }
+            function confirmarAtualizacao(idPessoa) {
+                const nome = $("#nome").val();
+                const rg = $("#rg").val();
+                const cpf = $("#cpf").val();
+                const data_nascimento = $("#data_nascimento").val();
+                const data_admissao = $("#data_admissao").val();
+                const dataFormatadaNascimento = formatarData(data_nascimento);
+                const dataFormatadaAdmissao = formatarData(data_admissao);
+                const cpfFormatado = formatarCPF(cpf);
+                const rgFormatado = formatarRG(rg);
+                const funcao = $("#funcao").val();
+                if (dataFormatadaNascimento === "Não é possível formatar: a data deve ter 8 dígitos" || dataFormatadaNascimento === "Não é possível formatar: dia ou mês fora do intervalo válido") {
+                    alert("Data de Nascimento inválida.");
+                    return;
+                }                
+                if (dataFormatadaAdmissao === "Não é possível formatar: a data deve ter 8 dígitos" || dataFormatadaAdmissao === "Não é possível formatar: dia ou mês fora do intervalo válido") {
+                    alert("Data de Admissão inválida.");
+                    return;
+                }
+                if (cpfFormatado === "Não é possível formatar: o CPF deve ter 11 dígitos") {
+                    alert("CPF inválido");
+                    return;
+                }
+                if (rgFormatado === "Não é possível formatar: o RG deve ter 9 dígitos") {
+                    alert("RG inválido");
+                    return;
+                }
+                $.ajax({
+                    type: "PUT",
+                    url: `/pessoas/${idPessoa}`,
+                    data: JSON.stringify({
+                        nome: nome,
+                        rg: rg,
+                        cpf: cpf,
+                        data_nascimento: dataFormatadaNascimento,
+                        data_admissao: dataFormatadaAdmissao,
+                        funcao: funcao
+                    }),
+                    contentType: "application/json",
+                    success: function (data) {
+                        alert("Pessoa atualizada com sucesso.");
+                        window.location.href = "/";
+                    },
+                    error: function () {
+                        alert("Erro ao atualizar a pessoa.");
+                    }
+                });
+            }
+        </script>
+        <script>
+            function excluir(idPessoa) {
+                if (confirm("Tem certeza de que deseja excluir a pessoa?")) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: `/pessoas/${idPessoa}`,
+                        success: function (data) {
+                            alert("Pessoa excluída com sucesso.");
+                            window.location.href = "/";
+                        },
+                        error: function () {
+                            alert("Erro ao excluir a pessoa.");
+                        }
+                    });
+                }
+            }
+        </script>
+        <script>
+            function adcionarPessoa() {
+                const form = `
+                    <h1> iPessoa - adcionar pessoa nova. </h1>
+                    <form id="addForm">
+                        <label for="nome">NOME:</label>
+                        <input type="text" id="nome" name="nome"><br><br>
+                        <label for="rg">RG:</label>
+                        <input type="text" id="rg" name="rg"><br><br>
+                        <label for="cpf">CPF:</label>
+                        <input type text="text" id="cpf" name="cpf"><br><br>
+                        <label for="data_nascimento">DATA DE NASCIMENTO:</label>
+                        <input type="text" id="data_nascimento" name="data_nascimento"><br><br>
+                        <label for="data_admissao">DATA DE ADMISSÃO:</label>
+                        <input type="text" id="data_admissao" name="data_admissao"><br><br>
+                        <label for="funcao">FUNÇÃO:</label>
+                        <input type="text" id="funcao" name="funcao"><br><br>
+                        <button type="button" onclick="enviarPessoa()">Adicionar Pessoa</button>
+                        <button type="button" onclick="cancelarAtualizacao()">CANCELAR</button>
+                    </form>
+                `;
+                $("body").html(form);
+            }
+            function enviarPessoa() {
+                const nome = $("#nome").val();
+                const rg = $("#rg").val();
+                const cpf = $("#cpf").val();
+                const data_nascimento = $("#data_nascimento").val();
+                const data_admissao = $("#data_admissao").val();
+                const funcao = $("#funcao").val();
+                const dataFormatadaNascimento = formatarData(data_nascimento);
+                const dataFormatadaAdmissao = formatarData(data_admissao);
+                const cpfFormatado = formatarCPF(cpf);
+                const rgFormatado = formatarRG(rg);
+                if (dataFormatadaNascimento === "Não é possível formatar: a data deve ter 8 dígitos" || dataFormatadaNascimento === "Não é possível formatar: dia ou mês fora do intervalo válido") {
+                    alert("Data de Nascimento inválida.");
+                    return;
+                }                
+                if (dataFormatadaAdmissao === "Não é possível formatar: a data deve ter 8 dígitos" || dataFormatadaAdmissao === "Não é possível formatar: dia ou mês fora do intervalo válido") {
+                    alert("Data de Admissão inválida.");
+                    return;
+                }
+                if (cpfFormatado === "Não é possível formatar: o CPF deve ter 11 dígitos") {
+                    alert("CPF inválido");
+                    return;
+                }
+                if (rgFormatado === "Não é possível formatar: o RG deve ter 9 dígitos") {
+                    alert("RG inválido");
+                    return;
+                }
+                const data = {
+                    nome: nome,
+                    rg: rg,
+                    cpf: cpf,
+                    data_nascimento: dataFormatadaNascimento,
+                    data_admissao: dataFormatadaAdmissao,
+                    funcao: funcao
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "/pessoas",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    success: function (data) {
+                        alert("Pessoa adicionada com sucesso.");
+                        window.location.href = "/";
+                    },
+                    error: function () {
+                        alert("Erro ao adicionar a pessoa.");
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
