@@ -36,7 +36,7 @@ O projeto iPessoa é uma aplicação de gerenciamento de informações pessoais.
 - Banco de Dados: MySQL.
 
 ## Como Acessar a Aplicação
-1. Clone este repositório em sua máquina local -- use: git clone .
+1. Clone este repositório em sua máquina local -- use: git clone https://github.com/lesiquivel/iPessoa.git.
 2. Instale as dependências usando `npm install` ou `yarn install`.
 3. Inicie o aplicativo com `npm start` ou `yarn start`.
 4. Acesse o aplicativo no seu navegador em [http://localhost:3000](http://localhost:3000).
