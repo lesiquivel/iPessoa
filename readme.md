@@ -35,10 +35,14 @@ O projeto iPessoa é uma aplicação de gerenciamento de informações pessoais.
 - Back-End: Python e Flask.
 - Banco de Dados: MySQL.
 
+## Pré-requisitos:
+- Ter Python instalado na máquina.
+- Ter um navegador instalado na máquina.
+
 ## Como Acessar a Aplicação
 1. Clone este repositório em sua máquina local -- use: git clone https://github.com/lesiquivel/iPessoa.git.
-2. Instale as dependências usando `npm install` ou `yarn install`.
-3. Inicie o aplicativo com `npm start` ou `yarn start`.
+2. Instale as dependências usando `pip install -r requirements.txt`.
+3. Inicie o aplicativo com `python app.py`.
 4. Acesse o aplicativo no seu navegador em [http://localhost:5000](http://localhost:3000).
 
 ## Contribuição a Aplicação
