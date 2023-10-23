@@ -39,7 +39,7 @@ O projeto iPessoa é uma aplicação de gerenciamento de informações pessoais.
 1. Clone este repositório em sua máquina local -- use: git clone https://github.com/lesiquivel/iPessoa.git.
 2. Instale as dependências usando `npm install` ou `yarn install`.
 3. Inicie o aplicativo com `npm start` ou `yarn start`.
-4. Acesse o aplicativo no seu navegador em [http://localhost:3000](http://localhost:3000).
+4. Acesse o aplicativo no seu navegador em [http://localhost:5000](http://localhost:3000).
 
 ## Contribuição a Aplicação
 Este projeto é de código aberto, e contribuições são bem-vindas. Sinta-se à vontade para abrir problemas (issues) e enviar solicitações de pull (pull requests) para melhorar o projeto.
